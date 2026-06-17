@@ -3,7 +3,7 @@
 // 1. Ativar "Senhas de app" na conta Google (não usa a senha normal)
 // 2. Preencher EMAIL_USER e EMAIL_PASS no arquivo .env (ou direto aqui para testes)
 
-const nodemailer = require("nodemailer/lib/nodemailer");
+const nodemailer = require("nodemailer");
 
 // Transporter: é a "conexão" com o servidor de e-mail.
 // Troque pelos seus dados ou use outro serviço (Outlook, Yahoo, etc.)
