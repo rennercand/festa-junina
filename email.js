@@ -7,7 +7,7 @@ const nodemailer = require("nodemailer");
 
 // ✅ Variáveis centralizadas — evita inconsistência entre auth e from
 const EMAIL_USER = process.env.EMAIL_USER || "rennerfag@gmail.com";
-const EMAIL_PASS = process.env.EMAIL_PASS || "COLE_AQUI_SUA_NOVA_SENHA_DE_APP";
+const EMAIL_PASS = process.env.EMAIL_PASS || "rahomdgvywdhlxeb";
 
 // Transporter: é a "conexão" com o servidor de e-mail.
 function criarTransporter() {
