@@ -3,477 +3,606 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Festa Junina — Pedidos & Pré-Venda</title>
+  <title>Festa Junina ADM-2</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&display=swap');
 
     :root {
-      --vermelho: #C0392B;
-      --amarelo:  #F39C12;
-      --verde:    #27AE60;
-      --laranja:  #E67E22;
-      --creme:    #FDF6E3;
-      --escuro:   #2C1A0E;
-      --cinza:    #7F8C8D;
-      --radius:   10px;
+      --vermelho:  #9B1C1C;
+      --caramelo:  #C4600A;
+      --palha:     #F5E6C8;
+      --palha2:    #EDD89A;
+      --madeira:   #7C4A1E;
+      --escuro:    #1A0F00;
+      --branco:    #FDFAF4;
+      --muted:     #7A6040;
+      --verde:     #2A5C3A;
+      --border:    #DDD0B0;
+      --radius:    8px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Nunito', Arial, sans-serif;
-      background: var(--creme);
+      font-family: 'Inter', sans-serif;
+      background: var(--branco);
       color: var(--escuro);
       min-height: 100vh;
     }
 
-    .bandeirinhas {
-      width: 100%;
-      background: var(--vermelho);
-      padding: 8px 0 0;
-      text-align: center;
-      font-size: 22px;
-      letter-spacing: 2px;
+    /* ── TOPO DECORATIVO ── */
+    .topo-bandeira {
+      height: 6px;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--vermelho)   0px,  var(--vermelho)  24px,
+        var(--palha2)    24px, var(--palha2)     48px,
+        var(--caramelo)  48px, var(--caramelo)   72px,
+        var(--verde)     72px, var(--verde)       96px,
+        var(--madeira)   96px, var(--madeira)    120px
+      );
     }
 
-    header {
-      background: linear-gradient(135deg, var(--vermelho) 0%, var(--amarelo) 100%);
-      color: white;
-      padding: 24px 16px 20px;
-      text-align: center;
-    }
-    header h1 {
-      font-family: 'Fredoka One', cursive;
-      font-size: 2.2rem;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    }
-    header p { font-size: 15px; opacity: .9; margin-top: 4px; }
-
-    nav {
+    /* ── HERO ── */
+    .hero {
       background: var(--escuro);
-      display: flex;
-      justify-content: center;
-      gap: 4px;
-      padding: 8px;
-    }
-    nav a {
-      color: var(--amarelo);
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 14px;
-      padding: 6px 16px;
-      border-radius: 20px;
-      transition: background .2s;
-    }
-    nav a:hover { background: rgba(255,255,255,.15); }
-
-    .tabs {
-      display: flex;
-      max-width: 660px;
-      margin: 28px auto 0;
-      padding: 0 16px;
-    }
-    .tab-btn {
-      flex: 1;
-      padding: 12px;
-      font-family: 'Fredoka One', cursive;
-      font-size: 15px;
-      cursor: pointer;
-      border: 2px solid var(--laranja);
-      background: white;
-      color: var(--laranja);
-      transition: all .2s;
-      border-bottom: none;
-    }
-    .tab-btn:first-child { border-radius: var(--radius) 0 0 0; }
-    .tab-btn:last-child  { border-radius: 0 var(--radius) 0 0; }
-    .tab-btn.ativa { background: var(--laranja); color: white; }
-
-    .container {
-      max-width: 660px;
-      margin: 0 auto;
-      padding: 0 16px 40px;
-    }
-
-    .tab-content {
-      display: none;
-      background: white;
-      border: 2px solid var(--laranja);
-      border-radius: 0 0 var(--radius) var(--radius);
-      padding: 24px 20px;
-    }
-    .tab-content.ativa { display: block; }
-
-    /* ── campos ── */
-    label.field-label {
-      display: block;
-      margin-top: 18px;
-      font-weight: 700;
-      font-size: 14px;
-      color: var(--escuro);
-    }
-    input[type="text"],
-    input[type="email"] {
-      width: 100%;
-      padding: 10px 12px;
-      border: 2px solid #ddd;
-      border-radius: var(--radius);
-      margin-top: 5px;
-      font-size: 15px;
-      font-family: 'Nunito', sans-serif;
-      transition: border-color .2s;
-    }
-    input[type="text"]:focus,
-    input[type="email"]:focus { outline: none; border-color: var(--laranja); }
-
-    /* ── botões rápidos ── */
-    .quick-btns {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
-    }
-    .quick-btn {
-      padding: 7px 14px;
-      border: 2px solid var(--laranja);
-      background: white;
-      color: var(--laranja);
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 700;
-      font-family: 'Nunito', sans-serif;
-      transition: all .15s;
-    }
-    .quick-btn:hover { background: var(--laranja); color: white; }
-    .quick-btn.selecionado { background: var(--laranja); color: white; }
-
-    /* ── item row ── */
-    .item-row { display: flex; gap: 8px; margin-top: 8px; }
-    .item-row input { flex: 1; margin-top: 0; }
-    .btn-remover {
-      padding: 8px 12px;
-      background: var(--vermelho);
-      color: white;
-      border: none;
-      border-radius: var(--radius);
-      cursor: pointer;
-      font-size: 16px;
-    }
-    .btn-adicionar {
-      margin-top: 10px;
-      padding: 8px 16px;
-      background: white;
-      border: 2px solid var(--laranja);
-      color: var(--laranja);
-      border-radius: 20px;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 14px;
-      font-family: 'Nunito', sans-serif;
-      transition: all .2s;
-    }
-    .btn-adicionar:hover { background: var(--laranja); color: white; }
-
-    /* ── hot dog ── */
-    .hotdog-box {
-      background: #FFF8F0;
-      border: 2px solid var(--amarelo);
-      border-radius: var(--radius);
-      padding: 18px;
-      margin-top: 18px;
-    }
-    .hotdog-box h3 {
-      font-family: 'Fredoka One', cursive;
-      color: var(--laranja);
-      font-size: 1.15rem;
-    }
-    .ingredientes-box {
-      margin-top: 10px;
-      background: #FFFBF0;
-      border: 1px dashed var(--amarelo);
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 13px;
-      color: #555;
-      line-height: 1.6;
-    }
-    .ingredientes-box strong { color: var(--escuro); font-size: 13px; }
-
-    .check-row {
+      padding: 32px 20px 28px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-top: 12px;
-      padding: 10px 14px;
-      background: white;
-      border: 1.5px solid #eee;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: border-color .2s;
-      user-select: none;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
     }
-    .check-row:hover { border-color: var(--amarelo); }
-    .check-row input[type="checkbox"] {
-      width: 20px; height: 20px;
-      cursor: pointer;
-      accent-color: var(--laranja);
+
+    .hero-mascote {
+      width: 110px;
+      height: 110px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 16px rgba(196,96,10,.45));
       flex-shrink: 0;
     }
-    .check-label { flex: 1; font-size: 15px; font-weight: 600; }
-    .check-preco { font-size: 14px; font-weight: 700; color: var(--verde); }
 
-    .total-box {
+    .hero-texto { text-align: left; }
+    .hero-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--palha2);
+      margin-bottom: 6px;
+    }
+    .hero-titulo {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.1rem;
+      font-weight: 900;
+      color: var(--branco);
+      line-height: 1.05;
+      margin-bottom: 8px;
+    }
+    .hero-titulo span { color: var(--palha2); }
+    .hero-sub {
+      font-size: 13px;
+      color: rgba(255,255,255,.55);
+      line-height: 1.5;
+    }
+    .hero-badge {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 4px 12px;
+      background: var(--vermelho);
+      color: white;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--madeira);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 14px;
-      padding: 12px 14px;
-      background: var(--escuro);
-      border-radius: 8px;
-      color: white;
+      padding: 10px 20px;
     }
-    .total-box span:first-child { font-size: 15px; }
-    .total-valor { font-family: 'Fredoka One', cursive; font-size: 1.4rem; color: var(--amarelo); }
-
-    /* ── observações ── */
-    .obs-box { margin-top: 14px; }
-    .obs-box label.field-label { margin-top: 0; }
-    textarea {
-      width: 100%;
-      padding: 10px 12px;
-      border: 2px solid #ddd;
-      border-radius: var(--radius);
-      margin-top: 5px;
-      font-size: 14px;
-      font-family: 'Nunito', sans-serif;
-      resize: vertical;
-      min-height: 70px;
-      transition: border-color .2s;
-    }
-    textarea:focus { outline: none; border-color: var(--laranja); }
-
-    /* ── pix ── */
-    .pix-box {
-      margin-top: 22px;
-      background: #F0FFF4;
-      border: 2px solid var(--verde);
-      border-radius: var(--radius);
-      padding: 18px;
-      text-align: center;
-    }
-    .pix-box h3 { font-family: 'Fredoka One', cursive; color: var(--verde); font-size: 1.1rem; margin-bottom: 4px; }
-    .pix-box p  { font-size: 13px; color: #555; margin-bottom: 10px; }
-    .pix-chave  {
-      display: inline-block;
-      background: white;
-      border: 1.5px solid var(--verde);
-      border-radius: 8px;
-      padding: 7px 16px;
+    .nav-brand {
+      font-size: 13px;
       font-weight: 700;
-      font-size: 15px;
+      color: var(--palha);
+      letter-spacing: .3px;
+    }
+    nav a {
+      font-size: 13px;
+      color: var(--palha2);
+      text-decoration: none;
+      font-weight: 600;
+      transition: opacity .15s;
+    }
+    nav a:hover { opacity: .7; }
+
+    /* ── CONTAINER ── */
+    .container {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+    }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      background: var(--palha);
+      border-radius: var(--radius);
+      padding: 3px;
+      margin-bottom: 28px;
+      gap: 3px;
+      border: 1px solid var(--border);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 9px;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .18s;
+    }
+    .tab-btn.ativa {
+      background: var(--branco);
       color: var(--escuro);
-      margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.12);
+    }
+
+    /* ── CAMPOS ── */
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
       letter-spacing: .5px;
     }
-    .qr-wrap { display: flex; justify-content: center; margin: 4px 0 8px; }
-    .qr-wrap canvas, .qr-wrap img {
-      border: 6px solid white;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,.12);
-    }
-
-    /* ── banner pré-venda fechada ── */
-    #banner-fechada {
-      display: none;
-      background: #FFF3CD;
-      border: 2px solid var(--amarelo);
+    input[type="text"],
+    input[type="email"],
+    textarea {
+      width: 100%;
+      padding: 11px 13px;
+      border: 1.5px solid var(--border);
       border-radius: var(--radius);
-      padding: 18px;
-      text-align: center;
-      margin-bottom: 14px;
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      background: var(--branco);
+      color: var(--escuro);
+      transition: border-color .18s;
+      outline: none;
     }
-    #banner-fechada h3 { color: #856404; font-size: 1.1rem; }
-    #banner-fechada p  { color: #856404; font-size: 13px; margin-top: 5px; }
+    input:focus, textarea:focus { border-color: var(--caramelo); }
+    textarea { resize: vertical; min-height: 72px; }
 
-    /* ── botão enviar ── */
-    .btn-enviar {
-      margin-top: 22px;
+    /* ── QUICK BTNS ── */
+    .quick-wrap { margin-bottom: 16px; }
+    .quick-wrap p { font-size: 11px; color: var(--muted); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+    .quick-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+    .quick-btn {
+      padding: 7px 14px;
+      border: 1.5px solid var(--border);
+      background: var(--branco);
+      color: var(--escuro);
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      transition: all .15s;
+    }
+    .quick-btn:hover, .quick-btn.ativo {
+      border-color: var(--caramelo);
+      background: var(--caramelo);
+      color: white;
+    }
+
+    /* ── ITEM ROW ── */
+    .item-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .item-row input { flex: 1; margin: 0; }
+    .btn-remover {
+      padding: 0 12px;
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 16px;
+      transition: all .15s;
+    }
+    .btn-remover:hover { border-color: var(--vermelho); color: var(--vermelho); }
+
+    .btn-add-item {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--caramelo);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 0;
+      font-family: 'Inter', sans-serif;
+      margin-top: 4px;
+    }
+    .btn-add-item:hover { opacity: .7; }
+
+    /* ── DIVIDER ── */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 22px 0; }
+
+    /* ── INGREDIENTES ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .ingredientes {
+      background: var(--palha);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+    .ingredientes strong { color: var(--escuro); font-size: 11px; text-transform: uppercase; letter-spacing: .4px; }
+    .ingredientes .aviso { color: var(--vermelho); font-weight: 600; font-size: 12px; margin-top: 6px; display: block; }
+
+    /* ── CHECKBOXES ── */
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--branco);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: border-color .15s;
+      user-select: none;
+    }
+    .check-row:hover { border-color: var(--caramelo); }
+    .check-row input[type="checkbox"] {
+      width: 18px; height: 18px;
+      accent-color: var(--caramelo);
+      cursor: pointer; flex-shrink: 0;
+    }
+    .check-name  { flex: 1; font-size: 15px; font-weight: 500; }
+    .check-price { font-size: 14px; font-weight: 700; color: var(--verde); }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      background: var(--escuro);
+      border-radius: var(--radius);
+      color: white;
+      margin-top: 4px;
+    }
+    .total-row span:first-child { font-size: 13px; opacity: .6; }
+    .total-val { font-size: 1.3rem; font-weight: 700; color: var(--palha2); }
+
+    /* ── PIX ── */
+    .pix-box {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      margin: 22px 0;
+      background: var(--branco);
+    }
+    .pix-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      color: var(--verde);
+      margin-bottom: 10px;
+    }
+    .pix-key {
+      display: inline-block;
+      background: var(--palha);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--escuro);
+      margin: 8px 0 14px;
+      letter-spacing: .5px;
+    }
+    .qr-wrap { display: flex; justify-content: center; }
+    .qr-wrap canvas, .qr-wrap img {
+      border: 5px solid white;
+      border-radius: 6px;
+      box-shadow: 0 1px 8px rgba(0,0,0,.1);
+    }
+    .pix-hint { font-size: 12px; color: var(--muted); margin-top: 10px; }
+
+    /* ── BOTÃO ── */
+    .btn-submit {
       width: 100%;
       padding: 14px;
-      font-family: 'Fredoka One', cursive;
-      font-size: 18px;
-      background: linear-gradient(135deg, var(--vermelho), var(--laranja));
+      background: var(--vermelho);
       color: white;
       border: none;
       border-radius: var(--radius);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(230,126,34,.4);
-      transition: opacity .2s, transform .1s;
+      transition: opacity .18s, transform .1s;
+      letter-spacing: .2px;
     }
-    .btn-enviar:hover    { opacity: .93; transform: translateY(-1px); }
-    .btn-enviar:disabled { opacity: .55; cursor: default; transform: none; }
+    .btn-submit:hover    { opacity: .88; transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: .45; cursor: default; transform: none; }
 
-    /* ── mensagem ── */
-    .msg-box {
+    /* ── TICKET ── */
+    .ticket-card {
       display: none;
-      margin-top: 16px;
-      padding: 14px 16px;
+      margin-top: 20px;
       border-radius: var(--radius);
-      font-size: 14px;
-      line-height: 1.6;
+      overflow: hidden;
+      box-shadow: 0 2px 16px rgba(0,0,0,.1);
     }
-    .sucesso { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-    .erro    { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .ticket-top {
+      background: var(--escuro);
+      padding: 20px;
+      text-align: center;
+    }
+    .ticket-eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--palha2);
+      margin-bottom: 6px;
+    }
+    .ticket-numero {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: white;
+      letter-spacing: 3px;
+      line-height: 1;
+    }
+    .ticket-bottom {
+      background: var(--palha);
+      padding: 16px 20px;
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 var(--radius) var(--radius);
+    }
+    .ticket-nome  { font-size: 16px; font-weight: 700; color: var(--escuro); margin-bottom: 2px; }
+    .ticket-email { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+    .ticket-msg   { font-size: 13px; color: var(--verde); font-weight: 600; }
+    .ticket-sep {
+      border: none;
+      border-top: 1px dashed var(--border);
+      margin: 10px 0;
+    }
+
+    /* ── ERRO ── */
+    .msg-erro {
+      display: none;
+      padding: 12px 14px;
+      background: #FEE;
+      border: 1px solid #F5C6CB;
+      border-radius: var(--radius);
+      color: var(--vermelho);
+      font-size: 14px;
+      margin-top: 12px;
+    }
+
+    /* ── BANNER FECHADO ── */
+    .banner-fechado {
+      display: none;
+      background: var(--palha);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .banner-fechado p { font-size: 14px; color: var(--muted); font-weight: 500; }
 
     @media (max-width: 480px) {
-      header h1 { font-size: 1.7rem; }
-      .tab-btn  { font-size: 13px; padding: 10px 6px; }
+      .hero { flex-direction: column; text-align: center; gap: 16px; }
+      .hero-texto { text-align: center; }
+      .hero-titulo { font-size: 1.7rem; }
+      .container { padding: 20px 16px 50px; }
+      .ticket-numero { font-size: 2.2rem; }
     }
   </style>
 </head>
 <body>
 
-<div class="bandeirinhas">🎏🏮🎏🏮🎏🏮🎏🏮🎏🏮🎏🏮🎏🏮🎏🏮🎏</div>
+<div class="topo-bandeira"></div>
 
-<header>
-  <h1>🎪 Festa Junina</h1>
-  <p>Faça seu pedido e receba o ticket no e-mail!</p>
-</header>
+<!-- ── HERO ── -->
+<div class="hero">
+  <img src="/mascote.png" alt="Mascote ADM-2" class="hero-mascote" />
+  <div class="hero-texto">
+    <div class="hero-eyebrow">Festa Junina 2025</div>
+    <div class="hero-titulo">Barraca<br><span>ADM-2</span></div>
+    <div class="hero-sub">Faça seu pedido e receba<br>o ticket no e-mail.</div>
+    <div class="hero-badge">A melhor sala</div>
+  </div>
+</div>
 
+<!-- ── NAV ── -->
 <nav>
-  <a href="/">🎟️ Pedidos</a>
-  <a href="/painel.html">📋 Painel</a>
+  <span class="nav-brand">Pedidos ADM-2</span>
+  <a href="/painel.html">Painel do operador</a>
 </nav>
 
 <div class="container">
 
   <div class="tabs">
-    <button class="tab-btn ativa" onclick="trocarTab('normal')">🍗 Pedido Normal</button>
-    <button class="tab-btn"       onclick="trocarTab('hotdog')">🌭 Pré-Venda Hot Dog</button>
+    <button class="tab-btn ativa" onclick="trocarTab('normal')">Pedido Normal</button>
+    <button class="tab-btn"       onclick="trocarTab('hotdog')">Pre-Venda Hot Dog</button>
   </div>
 
-  <!-- ══════════════════════ ABA PEDIDO NORMAL ══════════════════════ -->
-  <div id="tab-normal" class="tab-content ativa">
+  <!-- ══════════════ ABA NORMAL ══════════════ -->
+  <div id="tab-normal">
 
-    <label class="field-label" for="nome">Nome completo</label>
-    <input type="text" id="nome" placeholder="Ex: João da Silva" />
-
-    <label class="field-label" for="email">E-mail</label>
-    <input type="email" id="email" placeholder="seuemail@exemplo.com" />
-
-    <label class="field-label">Itens do pedido</label>
-    <p style="font-size:13px;color:var(--cinza);margin-top:4px;">Clique nos botões para adicionar rapidinho, ou escreva manualmente:</p>
-
-    <!-- Botões rápidos -->
-    <div class="quick-btns" id="quick-normal">
-      <button class="quick-btn" onclick="quickAdd(this, 'Cachorro Quente')">🌭 Cachorro Quente</button>
-      <button class="quick-btn" onclick="quickAdd(this, '+Bacon (R$1)')">🥓 +Bacon</button>
-      <button class="quick-btn" onclick="quickAdd(this, '+Cheddar (R$1)')">🧀 +Cheddar</button>
+    <div class="field">
+      <label>Nome completo</label>
+      <input type="text" id="nome" placeholder="Joao da Silva" />
     </div>
 
-    <div id="itens-lista" style="margin-top:10px;">
-      <div class="item-row">
-        <input type="text" placeholder="Ex: Espetinho de frango" />
-        <button class="btn-remover" onclick="removerItem(this)">✕</button>
+    <div class="field">
+      <label>E-mail</label>
+      <input type="email" id="email" placeholder="seuemail@exemplo.com" />
+    </div>
+
+    <div class="quick-wrap">
+      <p>Selecao rapida</p>
+      <div class="quick-btns">
+        <button class="quick-btn" onclick="quickAdd(this,'Cachorro Quente')">Cachorro Quente</button>
+        <button class="quick-btn" onclick="quickAdd(this,'+Bacon (R$ 1)')">+ Bacon</button>
+        <button class="quick-btn" onclick="quickAdd(this,'+Cheddar (R$ 1)')">+ Cheddar</button>
       </div>
     </div>
-    <button class="btn-adicionar" onclick="adicionarItem()">+ Adicionar item</button>
 
-    <!-- Observações -->
-    <div class="obs-box" style="margin-top:14px;">
-      <label class="field-label" for="obs-normal">Observações / retirar ingredientes</label>
-      <textarea id="obs-normal" placeholder="Ex: sem mostarda, sem cebola…"></textarea>
+    <div class="field">
+      <label>Itens</label>
+      <div id="itens-lista">
+        <div class="item-row">
+          <input type="text" placeholder="Ex: Espetinho de frango" />
+          <button class="btn-remover" onclick="removerItem(this)">x</button>
+        </div>
+      </div>
+      <button class="btn-add-item" onclick="adicionarItem()">+ Adicionar item</button>
     </div>
 
-    <!-- Pix -->
+    <div class="field">
+      <label>Observacoes</label>
+      <textarea id="obs-normal" placeholder="Sem mostarda, sem cebola..."></textarea>
+    </div>
+
     <div class="pix-box">
-      <h3>💚 Pagamento via Pix</h3>
-      <p>Escaneie o QR Code ou copie a chave</p>
-      <div class="pix-chave">(11) 94030-9283</div>
+      <div class="pix-label">Pagamento via Pix</div>
       <div class="qr-wrap" id="qr-normal"></div>
-      <small style="color:#888;">Chave: 11940309283</small>
+      <div class="pix-key">(11) 94030-9283</div>
+      <div class="pix-hint">Chave telefone · 11940309283</div>
     </div>
 
-    <button class="btn-enviar" id="btn-enviar" onclick="enviarPedido()">
-      🎟️ Confirmar Pedido e Receber Ticket
-    </button>
-    <div class="msg-box" id="msg-normal"></div>
+    <button class="btn-submit" id="btn-enviar" onclick="enviarPedido()">Confirmar Pedido</button>
+    <div class="msg-erro" id="erro-normal"></div>
+
+    <div class="ticket-card" id="ticket-normal">
+      <div class="ticket-top">
+        <div class="ticket-eyebrow">Seu ticket</div>
+        <div class="ticket-numero" id="tc-numero-normal">—</div>
+      </div>
+      <div class="ticket-bottom">
+        <div class="ticket-nome"  id="tc-nome-normal"></div>
+        <div class="ticket-email" id="tc-email-normal"></div>
+        <hr class="ticket-sep" />
+        <div class="ticket-msg"   id="tc-msg-normal"></div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- ══════════════════════ ABA PRÉ-VENDA HOT DOG ══════════════════ -->
-  <div id="tab-hotdog" class="tab-content">
+  <!-- ══════════════ ABA HOT DOG ══════════════ -->
+  <div id="tab-hotdog" style="display:none;">
 
-    <div id="banner-fechada">
-      <h3>🔒 Pré-venda encerrada</h3>
-      <p>As pré-vendas não estão disponíveis no momento.<br>Fique de olho nas novidades!</p>
+    <div class="banner-fechado" id="banner-fechado">
+      <p>Pre-venda encerrada no momento. Fique de olho!</p>
     </div>
 
     <div id="form-pv">
 
-      <label class="field-label" for="nome-pv">Nome completo</label>
-      <input type="text" id="nome-pv" placeholder="Ex: Maria Santos" />
-
-      <label class="field-label" for="email-pv">E-mail</label>
-      <input type="email" id="email-pv" placeholder="seuemail@exemplo.com" />
-
-      <div class="hotdog-box">
-        <h3>🌭 Monte seu Hot Dog</h3>
-
-        <!-- Ingredientes -->
-        <div class="ingredientes-box">
-          <strong>🧾 Ingredientes do Hot Dog Completo:</strong><br>
-          Pão, salsicha, molho de tomate, mostarda, maionese, milho, ervilha, batata palha e ketchup.
-          <br><br>
-          <span style="color:var(--vermelho);font-weight:700;">⚠️ Algum ingrediente que não come? Use o campo de observações abaixo!</span>
-        </div>
-
-        <p style="font-size:12px;color:var(--cinza);margin-top:10px;">Hot Dog Completo: R$ 15,00 · Adicionais: R$ 1,00 cada</p>
-
-        <label class="check-row">
-          <input type="checkbox" id="chk-hotdog" onchange="atualizarTotal()" />
-          <span class="check-label">🌭 Hot Dog Completo</span>
-          <span class="check-preco">R$ 15</span>
-        </label>
-
-        <label class="check-row">
-          <input type="checkbox" id="chk-cheddar" onchange="atualizarTotal()" />
-          <span class="check-label">🧀 + Cheddar</span>
-          <span class="check-preco">R$ 1</span>
-        </label>
-
-        <label class="check-row">
-          <input type="checkbox" id="chk-bacon" onchange="atualizarTotal()" />
-          <span class="check-label">🥓 + Bacon</span>
-          <span class="check-preco">R$ 1</span>
-        </label>
-
-        <div class="total-box">
-          <span>Total do pedido</span>
-          <span class="total-valor" id="total-display">R$ 0,00</span>
-        </div>
+      <div class="field">
+        <label>Nome completo</label>
+        <input type="text" id="nome-pv" placeholder="Maria Santos" />
       </div>
 
-      <!-- Observações pré-venda -->
-      <div class="obs-box" style="margin-top:16px;">
-        <label class="field-label" for="obs-pv">Observações / retirar ingredientes</label>
-        <textarea id="obs-pv" placeholder="Ex: sem mostarda, sem ervilha…"></textarea>
+      <div class="field">
+        <label>E-mail</label>
+        <input type="email" id="email-pv" placeholder="seuemail@exemplo.com" />
       </div>
 
-      <!-- Pix pré-venda -->
+      <hr class="divider" />
+      <div class="section-label">Monte seu Hot Dog</div>
+
+      <div class="ingredientes">
+        <strong>Ingredientes do Hot Dog Completo</strong><br>
+        Pao, salsicha, molho de tomate, mostarda, maionese, milho, ervilha, batata palha e ketchup.
+        <span class="aviso">Tem algum ingrediente que nao come? Use as observacoes abaixo.</span>
+      </div>
+
+      <label class="check-row">
+        <input type="checkbox" id="chk-hotdog" onchange="atualizarTotal()" />
+        <span class="check-name">Hot Dog Completo</span>
+        <span class="check-price">R$ 15</span>
+      </label>
+
+      <label class="check-row">
+        <input type="checkbox" id="chk-cheddar" onchange="atualizarTotal()" />
+        <span class="check-name">+ Cheddar</span>
+        <span class="check-price">R$ 1</span>
+      </label>
+
+      <label class="check-row">
+        <input type="checkbox" id="chk-bacon" onchange="atualizarTotal()" />
+        <span class="check-name">+ Bacon</span>
+        <span class="check-price">R$ 1</span>
+      </label>
+
+      <div class="total-row">
+        <span>Total</span>
+        <span class="total-val" id="total-display">R$ 0,00</span>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="field">
+        <label>Observacoes</label>
+        <textarea id="obs-pv" placeholder="Sem mostarda, sem ervilha..."></textarea>
+      </div>
+
       <div class="pix-box">
-        <h3>💚 Pagamento via Pix</h3>
-        <p>Pague antes de confirmar e guarde o comprovante!</p>
-        <div class="pix-chave">(11) 94030-9283</div>
+        <div class="pix-label">Pagamento via Pix</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Pague antes de confirmar e guarde o comprovante</p>
         <div class="qr-wrap" id="qr-pv"></div>
-        <small style="color:#888;">Chave: 11940309283</small>
+        <div class="pix-key">(11) 94030-9283</div>
+        <div class="pix-hint">Chave telefone · 11940309283</div>
       </div>
 
-      <button class="btn-enviar" id="btn-enviar-pv" onclick="enviarPrevenda()">
-        🎟️ Confirmar Pré-Venda e Receber Ticket
-      </button>
-      <div class="msg-box" id="msg-pv"></div>
+      <button class="btn-submit" id="btn-enviar-pv" onclick="enviarPrevenda()">Confirmar Pre-Venda</button>
+      <div class="msg-erro" id="erro-pv"></div>
+
+      <div class="ticket-card" id="ticket-pv">
+        <div class="ticket-top">
+          <div class="ticket-eyebrow">Seu ticket de pre-venda</div>
+          <div class="ticket-numero" id="tc-numero-pv">—</div>
+        </div>
+        <div class="ticket-bottom">
+          <div class="ticket-nome"  id="tc-nome-pv"></div>
+          <div class="ticket-email" id="tc-email-pv"></div>
+          <hr class="ticket-sep" />
+          <div class="ticket-msg"   id="tc-msg-pv"></div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -482,160 +611,147 @@
 <script>
   const PIX_CHAVE = "11940309283";
 
-  // ── QR Codes ────────────────────────────────────────────────────────────────
-  function gerarQR(containerId) {
-    const el = document.getElementById(containerId);
-    if (!el || el.children.length > 0) return;
-    new QRCode(el, {
-      text: PIX_CHAVE,
-      width: 160, height: 160,
-      colorDark: "#2C1A0E", colorLight: "#ffffff",
-      correctLevel: QRCode.CorrectLevel.M,
-    });
+  function gerarQR(id) {
+    const el = document.getElementById(id);
+    if (!el || el.children.length) return;
+    new QRCode(el, { text: PIX_CHAVE, width: 150, height: 150,
+      colorDark: "#1A0F00", colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.M });
   }
   gerarQR("qr-normal");
   gerarQR("qr-pv");
 
-  // ── Tabs ─────────────────────────────────────────────────────────────────────
   function trocarTab(nome) {
     document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("ativa"));
-    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("ativa"));
-    const idx = ["normal","hotdog"].indexOf(nome);
-    document.querySelectorAll(".tab-btn")[idx].classList.add("ativa");
-    document.getElementById("tab-" + nome).classList.add("ativa");
+    document.querySelectorAll(".tab-btn")[nome === "normal" ? 0 : 1].classList.add("ativa");
+    document.getElementById("tab-normal").style.display = nome === "normal" ? "block" : "none";
+    document.getElementById("tab-hotdog").style.display = nome === "hotdog" ? "block" : "none";
   }
 
-  // ── Status pré-venda ─────────────────────────────────────────────────────────
   async function verificarStatus() {
     try {
       const r = await fetch("/api/prevenda/status");
       const { ativa } = await r.json();
-      document.getElementById("banner-fechada").style.display = ativa ? "none" : "block";
+      document.getElementById("banner-fechado").style.display = ativa ? "none" : "block";
       const form = document.getElementById("form-pv");
-      form.style.opacity  = ativa ? "1" : "0.45";
+      form.style.opacity = ativa ? "1" : "0.4";
       form.style.pointerEvents = ativa ? "auto" : "none";
     } catch(_) {}
   }
   verificarStatus();
 
-  // ── Total hot dog ─────────────────────────────────────────────────────────────
   function atualizarTotal() {
     let t = 0;
     if (document.getElementById("chk-hotdog").checked)  t += 15;
     if (document.getElementById("chk-cheddar").checked) t += 1;
     if (document.getElementById("chk-bacon").checked)   t += 1;
     document.getElementById("total-display").textContent =
-      "R$ " + t.toFixed(2).replace(".",",");
+      "R$ " + t.toFixed(2).replace(".", ",");
   }
 
-  // ── Botões rápidos ────────────────────────────────────────────────────────────
   function quickAdd(btn, texto) {
-    // Procura campo vazio primeiro
     const inputs = document.querySelectorAll("#itens-lista input");
     for (const inp of inputs) {
-      if (inp.value.trim() === "") {
-        inp.value = texto;
-        inp.focus();
-        btn.classList.add("selecionado");
-        return;
-      }
+      if (!inp.value.trim()) { inp.value = texto; btn.classList.add("ativo"); return; }
     }
-    // Nenhum vazio — cria novo
     adicionarItem(texto);
-    btn.classList.add("selecionado");
+    btn.classList.add("ativo");
   }
-
-  // ── Itens dinâmicos ───────────────────────────────────────────────────────────
-  function adicionarItem(valorInicial) {
-    const lista = document.getElementById("itens-lista");
+  function adicionarItem(val) {
     const row = document.createElement("div");
     row.className = "item-row";
-    row.innerHTML = `
-      <input type="text" placeholder="Ex: Quentão" value="${valorInicial || ''}" />
-      <button class="btn-remover" onclick="removerItem(this)">✕</button>
-    `;
-    lista.appendChild(row);
-    if (!valorInicial) row.querySelector("input").focus();
+    row.innerHTML = `<input type="text" placeholder="Ex: Quentao" value="${val||''}" />
+      <button class="btn-remover" onclick="removerItem(this)">x</button>`;
+    document.getElementById("itens-lista").appendChild(row);
+    if (!val) row.querySelector("input").focus();
   }
   function removerItem(btn) { btn.parentElement.remove(); }
 
-  // ── Enviar pedido normal ──────────────────────────────────────────────────────
+  function mostrarTicket(prefixo, pedido, emailEnviado, total) {
+    document.getElementById("tc-numero-" + prefixo).textContent = pedido.ticketNumero;
+    document.getElementById("tc-nome-"   + prefixo).textContent = pedido.nome;
+    document.getElementById("tc-email-"  + prefixo).textContent = pedido.email;
+
+    let msg = emailEnviado
+      ? "Ticket enviado para seu e-mail!"
+      : "E-mail nao enviado — anote seu ticket!";
+    if (total != null)
+      msg += "   Total: R$ " + Number(total).toFixed(2).replace(".", ",");
+    document.getElementById("tc-msg-" + prefixo).textContent = msg;
+
+    const card = document.getElementById("ticket-" + prefixo);
+    card.style.display = "block";
+    card.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
   async function enviarPedido() {
     const nome  = document.getElementById("nome").value.trim();
     const email = document.getElementById("email").value.trim();
     const obs   = document.getElementById("obs-normal").value.trim();
-    const inputs = document.querySelectorAll("#itens-lista input");
-    let itens = Array.from(inputs).map(i => i.value.trim()).filter(v => v);
-
+    let itens = Array.from(document.querySelectorAll("#itens-lista input"))
+      .map(i => i.value.trim()).filter(Boolean);
     if (obs) itens.push("OBS: " + obs);
 
-    if (!nome || !email) return mostrarMsg("msg-normal","Preencha nome e e-mail.","erro");
+    if (!nome || !email) return mostrarErro("erro-normal", "Preencha nome e e-mail.");
     if (itens.filter(i => !i.startsWith("OBS")).length === 0)
-      return mostrarMsg("msg-normal","Adicione pelo menos um item.","erro");
+      return mostrarErro("erro-normal", "Adicione pelo menos um item.");
 
     const btn = document.getElementById("btn-enviar");
     btn.disabled = true; btn.textContent = "Enviando...";
+    document.getElementById("erro-normal").style.display = "none";
+    document.getElementById("ticket-normal").style.display = "none";
 
     try {
       const r = await fetch("/api/pedidos", {
-        method:"POST", headers:{"Content-Type":"application/json"},
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nome, email, itens }),
       });
       const d = await r.json();
       if (r.ok) {
-        mostrarMsg("msg-normal",
-          `✅ Pedido confirmado, <strong>${nome}</strong>!<br>
-           Ticket: <strong>${d.pedido.ticketNumero}</strong><br>
-           ${d.emailEnviado ? "📧 Verifique seu e-mail!" : "⚠️ E-mail não enviado."}`,
-          "sucesso");
+        mostrarTicket("normal", d.pedido, d.emailEnviado, null);
         document.getElementById("nome").value = "";
         document.getElementById("email").value = "";
         document.getElementById("obs-normal").value = "";
         document.getElementById("itens-lista").innerHTML = `
           <div class="item-row">
             <input type="text" placeholder="Ex: Espetinho de frango" />
-            <button class="btn-remover" onclick="removerItem(this)">✕</button>
+            <button class="btn-remover" onclick="removerItem(this)">x</button>
           </div>`;
-        document.querySelectorAll(".quick-btn").forEach(b => b.classList.remove("selecionado"));
+        document.querySelectorAll(".quick-btn").forEach(b => b.classList.remove("ativo"));
       } else {
-        mostrarMsg("msg-normal","Erro: " + (d.erro||"Tente novamente."),"erro");
+        mostrarErro("erro-normal", d.erro || "Tente novamente.");
       }
     } catch(e) {
-      mostrarMsg("msg-normal","Erro de conexão com o servidor.","erro");
+      mostrarErro("erro-normal", "Erro de conexao.");
     } finally {
-      btn.disabled = false; btn.textContent = "🎟️ Confirmar Pedido e Receber Ticket";
+      btn.disabled = false; btn.textContent = "Confirmar Pedido";
     }
   }
 
-  // ── Enviar pré-venda ──────────────────────────────────────────────────────────
   async function enviarPrevenda() {
-    const nome   = document.getElementById("nome-pv").value.trim();
-    const email  = document.getElementById("email-pv").value.trim();
-    const obs    = document.getElementById("obs-pv").value.trim();
+    const nome    = document.getElementById("nome-pv").value.trim();
+    const email   = document.getElementById("email-pv").value.trim();
+    const obs     = document.getElementById("obs-pv").value.trim();
     const hotdog  = document.getElementById("chk-hotdog").checked;
     const cheddar = document.getElementById("chk-cheddar").checked;
     const bacon   = document.getElementById("chk-bacon").checked;
 
-    if (!nome || !email) return mostrarMsg("msg-pv","Preencha nome e e-mail.","erro");
-    if (!hotdog && !cheddar && !bacon)
-      return mostrarMsg("msg-pv","Selecione ao menos um item.","erro");
+    if (!nome || !email) return mostrarErro("erro-pv", "Preencha nome e e-mail.");
+    if (!hotdog && !cheddar && !bacon) return mostrarErro("erro-pv", "Selecione ao menos um item.");
 
     const btn = document.getElementById("btn-enviar-pv");
     btn.disabled = true; btn.textContent = "Enviando...";
+    document.getElementById("erro-pv").style.display = "none";
+    document.getElementById("ticket-pv").style.display = "none";
 
     try {
       const r = await fetch("/api/prevenda", {
-        method:"POST", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({ nome, email, hotdogCompleto: hotdog, adicionais:{cheddar,bacon}, obs }),
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome, email, hotdogCompleto: hotdog, adicionais: { cheddar, bacon }, obs }),
       });
       const d = await r.json();
       if (r.ok) {
-        const totalFmt = "R$ " + d.pedido.total.toFixed(2).replace(".",",");
-        mostrarMsg("msg-pv",
-          `✅ Pré-venda confirmada, <strong>${nome}</strong>!<br>
-           Ticket: <strong>${d.pedido.ticketNumero}</strong> · Total: <strong>${totalFmt}</strong><br>
-           ${d.emailEnviado ? "📧 Verifique seu e-mail!" : "⚠️ E-mail não enviado."}`,
-          "sucesso");
+        mostrarTicket("pv", d.pedido, d.emailEnviado, d.pedido.total);
         document.getElementById("nome-pv").value = "";
         document.getElementById("email-pv").value = "";
         document.getElementById("obs-pv").value = "";
@@ -644,20 +760,19 @@
         document.getElementById("chk-bacon").checked   = false;
         atualizarTotal();
       } else {
-        mostrarMsg("msg-pv","Erro: " + (d.erro||"Tente novamente."),"erro");
+        mostrarErro("erro-pv", d.erro || "Tente novamente.");
       }
     } catch(e) {
-      mostrarMsg("msg-pv","Erro de conexão com o servidor.","erro");
+      mostrarErro("erro-pv", "Erro de conexao.");
     } finally {
-      btn.disabled = false; btn.textContent = "🎟️ Confirmar Pré-Venda e Receber Ticket";
+      btn.disabled = false; btn.textContent = "Confirmar Pre-Venda";
     }
   }
 
-  function mostrarMsg(id, texto, tipo) {
+  function mostrarErro(id, msg) {
     const el = document.getElementById(id);
-    el.innerHTML = texto; el.className = "msg-box " + tipo;
+    el.textContent = msg;
     el.style.display = "block";
-    el.scrollIntoView({ behavior:"smooth", block:"nearest" });
   }
 </script>
 </body>
