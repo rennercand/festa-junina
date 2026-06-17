@@ -19,9 +19,14 @@ if (!EMAIL_USER || !EMAIL_PASS) {
 // ✅ Timeouts adicionados: sem isso, se o Railway/Gmail travar a conexão,
 // o Nodemailer fica esperando por minutos e o pedido do usuário "trava"
 // esperando a resposta do servidor (mesmo que o pedido já tenha sido salvo).
+// ✅ Porta forçada para 587 (STARTTLS) ao invés de deixar o "service: gmail"
+// escolher automaticamente (geralmente cai na 465/SSL). Alguns hosts cloud
+// (como o Railway) bloqueiam ou têm instabilidade numa porta específica.
 function criarTransporter() {
   return nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, // false = usa STARTTLS (upgrade da conexão depois do handshake)
     auth: {
       user: EMAIL_USER,
       pass: EMAIL_PASS,
