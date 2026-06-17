@@ -1,69 +1,48 @@
 // server.js — Servidor principal da aplicação
-// Express é um framework web minimalista para Node.js. Ele recebe as requisições
-// do frontend (HTML), processa, salva no banco e responde com JSON.
 
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
 
-// Importa os módulos que criamos
 const db = require("./db");
 const { enviarTicket } = require("./email");
 
 const app = express();
 const PORTA = process.env.PORT || 3000;
 
-// ─── MIDDLEWARES ────────────────────────────────────────────────────────────
-// Middlewares são funções que rodam antes das rotas processar a requisição.
+// Senha do operador (pode mover para variável de ambiente depois)
+const SENHA_OPERADOR = process.env.SENHA_OPERADOR || "pankeka67";
 
-// cors(): permite que o frontend (mesmo em outro domínio/porta) acesse o backend
+// ─── MIDDLEWARES ──────────────────────────────────────────────────────────────
 app.use(cors());
-
-// express.json(): interpreta o corpo das requisições como JSON automaticamente
 app.use(express.json());
-
-// express.static(): serve os arquivos HTML/CSS/JS da pasta "public" como site estático
-// Quando alguém acessa http://localhost:3000/, o Express devolve o index.html
 app.use(express.static(path.join(__dirname, "public")));
 
 
-// ─── ROTAS DA API ────────────────────────────────────────────────────────────
-// Rotas são os "endereços" que o frontend chama. Todas começam com /api/
+// ─── PEDIDOS NORMAIS ──────────────────────────────────────────────────────────
 
-// POST /api/pedidos — Cria um novo pedido e envia o ticket por e-mail
-// O frontend manda: { nome, email, itens: ["item1", "item2"] }
+// POST /api/pedidos — Cria pedido normal
 app.post("/api/pedidos", async (req, res) => {
   const { nome, email, itens } = req.body;
 
-  // Validação básica: todos os campos são obrigatórios
   if (!nome || !email || !itens || itens.length === 0) {
-    return res.status(400).json({
-      erro: "Campos obrigatórios: nome, email e pelo menos um item.",
-    });
+    return res.status(400).json({ erro: "Campos obrigatórios: nome, email e pelo menos um item." });
   }
 
   try {
-    // 1. Salva o pedido no banco JSON e gera o número do ticket
     const pedido = db.criarPedido({ nome, email, itens });
     console.log(`📦 Novo pedido criado: ${pedido.ticketNumero} — ${nome}`);
 
-    // 2. Tenta enviar o e-mail com o ticket (não bloqueia se falhar)
     const resultadoEmail = await enviarTicket(pedido);
 
-    // 3. Responde ao frontend com o pedido criado + status do e-mail
-    res.status(201).json({
-      mensagem: "Pedido criado com sucesso!",
-      pedido,
-      emailEnviado: resultadoEmail.sucesso,
-    });
+    res.status(201).json({ mensagem: "Pedido criado com sucesso!", pedido, emailEnviado: resultadoEmail.sucesso });
   } catch (erro) {
     console.error("Erro ao criar pedido:", erro);
     res.status(500).json({ erro: "Erro interno ao criar o pedido." });
   }
 });
 
-
-// GET /api/pedidos — Lista todos os pedidos (usado pelo painel de pré-venda)
+// GET /api/pedidos — Lista todos os pedidos
 app.get("/api/pedidos", (req, res) => {
   try {
     const pedidos = db.listarPedidos();
@@ -73,44 +52,110 @@ app.get("/api/pedidos", (req, res) => {
   }
 });
 
-
-// PATCH /api/pedidos/:ticket/item — Marca um item individual como feito (checkbox)
-// O frontend manda: { item: "nome do item" }
-// :ticket é um parâmetro dinâmico na URL, ex: /api/pedidos/FJ-0001/item
+// PATCH /api/pedidos/:ticket/item
 app.patch("/api/pedidos/:ticket/item", (req, res) => {
-  const { ticket } = req.params; // pega o ticket da URL
-  const { item } = req.body;     // pega o item do corpo JSON
-
-  if (!item) {
-    return res.status(400).json({ erro: "Informe o item a finalizar." });
-  }
+  const { ticket } = req.params;
+  const { item } = req.body;
+  if (!item) return res.status(400).json({ erro: "Informe o item a finalizar." });
 
   const pedido = db.finalizarItem(ticket, item);
-
-  if (!pedido) {
-    return res.status(404).json({ erro: "Pedido não encontrado." });
-  }
+  if (!pedido) return res.status(404).json({ erro: "Pedido não encontrado." });
 
   res.json({ mensagem: "Item atualizado.", pedido });
 });
 
-
-// PATCH /api/pedidos/:ticket/finalizar — Finaliza o pedido inteiro (botão "Finalizar")
+// PATCH /api/pedidos/:ticket/finalizar
 app.patch("/api/pedidos/:ticket/finalizar", (req, res) => {
   const { ticket } = req.params;
   const pedido = db.finalizarPedido(ticket);
-
-  if (!pedido) {
-    return res.status(404).json({ erro: "Pedido não encontrado." });
-  }
+  if (!pedido) return res.status(404).json({ erro: "Pedido não encontrado." });
 
   console.log(`✅ Pedido finalizado: ${ticket}`);
   res.json({ mensagem: "Pedido finalizado com sucesso!", pedido });
 });
 
 
-// ─── INICIAR SERVIDOR ────────────────────────────────────────────────────────
+// ─── PRÉ-VENDA HOT DOG ────────────────────────────────────────────────────────
+
+// GET /api/prevenda/status — informa se a pré-venda está aberta
+app.get("/api/prevenda/status", (req, res) => {
+  res.json({ ativa: db.isPrevendaAtiva() });
+});
+
+// POST /api/prevenda — Cria pré-venda de hot dog
+app.post("/api/prevenda", async (req, res) => {
+  if (!db.isPrevendaAtiva()) {
+    return res.status(403).json({ erro: "Pré-venda encerrada no momento." });
+  }
+
+  const { nome, email, hotdogCompleto, adicionais } = req.body;
+  // adicionais: { cheddar: bool, bacon: bool }
+
+  if (!nome || !email) {
+    return res.status(400).json({ erro: "Nome e e-mail são obrigatórios." });
+  }
+  if (!hotdogCompleto && !adicionais?.cheddar && !adicionais?.bacon) {
+    return res.status(400).json({ erro: "Selecione ao menos um item." });
+  }
+
+  // Monta lista de itens e calcula total
+  const itens = [];
+  let total = 0;
+
+  if (hotdogCompleto) {
+    itens.push("Hot Dog Completo");
+    total += 15;
+  }
+  if (adicionais?.cheddar) {
+    itens.push("+Cheddar");
+    total += 1;
+  }
+  if (adicionais?.bacon) {
+    itens.push("+Bacon");
+    total += 1;
+  }
+
+  try {
+    const pedido = db.criarPrevendaHotdog({ nome, email, itens, total });
+    console.log(`🌭 Pré-venda criada: ${pedido.ticketNumero} — ${nome} — R$${total}`);
+
+    const resultadoEmail = await enviarTicket({ ...pedido, total });
+
+    res.status(201).json({ mensagem: "Pré-venda confirmada!", pedido, emailEnviado: resultadoEmail.sucesso });
+  } catch (erro) {
+    console.error("Erro ao criar pré-venda:", erro);
+    res.status(500).json({ erro: "Erro interno ao criar a pré-venda." });
+  }
+});
+
+
+// ─── OPERADOR ────────────────────────────────────────────────────────────────
+
+// POST /api/operador/login — verifica senha
+app.post("/api/operador/login", (req, res) => {
+  const { senha } = req.body;
+  if (senha === SENHA_OPERADOR) {
+    res.json({ ok: true });
+  } else {
+    res.status(401).json({ ok: false, erro: "Senha incorreta." });
+  }
+});
+
+// PATCH /api/operador/prevenda — ativa ou desativa pré-venda
+app.patch("/api/operador/prevenda", (req, res) => {
+  const { senha, ativa } = req.body;
+  if (senha !== SENHA_OPERADOR) {
+    return res.status(401).json({ erro: "Não autorizado." });
+  }
+  db.setConfig("prevenda_ativa", ativa ? "true" : "false");
+  console.log(`🔧 Pré-venda ${ativa ? "ATIVADA" : "DESATIVADA"} pelo operador`);
+  res.json({ mensagem: `Pré-venda ${ativa ? "ativada" : "desativada"}.`, ativa });
+});
+
+
+// ─── INICIAR ──────────────────────────────────────────────────────────────────
 app.listen(PORTA, () => {
   console.log(`🎪 Servidor rodando em http://localhost:${PORTA}`);
-  console.log(`📋 Painel de pedidos: http://localhost:${PORTA}/painel.html`);
+  console.log(`📋 Painel: http://localhost:${PORTA}/painel.html`);
+  console.log(`🔑 Senha operador: ${SENHA_OPERADOR}`);
 });
