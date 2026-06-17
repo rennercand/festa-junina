@@ -25,8 +25,8 @@ if (!EMAIL_USER || !EMAIL_PASS) {
 function criarTransporter() {
   return nodemailer.createTransport({
     host: "smtp.gmail.com",
-    port: 587,
-    secure: false, // false = usa STARTTLS (upgrade da conexão depois do handshake)
+    port: 465,
+    secure: true, // false = usa STARTTLS (upgrade da conexão depois do handshake)
     auth: {
       user: EMAIL_USER,
       pass: EMAIL_PASS,
