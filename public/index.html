@@ -462,45 +462,57 @@
   <div id="tab-normal">
 
     <div class="field">
-      <label>Nome completo</label>
+      <label>Nome completo *</label>
       <input type="text" id="nome" placeholder="Joao da Silva" />
     </div>
 
-    <div class="field">
-      <label>E-mail</label>
-      <input type="email" id="email" placeholder="seuemail@exemplo.com" />
+    <hr class="divider" />
+    <div class="section-label">Monte seu Cachorro Quente</div>
+
+    <!-- DESCRIÇÃO DO CACHORRO QUENTE — descomente para exibir
+    <div class="ingredientes">
+      <strong>Cachorro Quente</strong><br>
+      Pao, salsicha, molho de tomate, mostarda, maionese, milho, ervilha, batata palha e ketchup.
+      <span class="aviso">Alguma restricao? Use o campo de observacoes.</span>
+    </div>
+    -->
+
+    <label class="check-row" style="border-color:var(--caramelo);background:var(--palha);">
+      <input type="checkbox" checked disabled style="accent-color:var(--caramelo);" />
+      <span class="check-name" style="font-weight:700;">Cachorro Quente</span>
+      <span class="check-price">R$ 15</span>
+    </label>
+
+    <label class="check-row" id="row-cheddar-n" onclick="toggleAdicionalNormal('cheddar')" style="cursor:pointer;">
+      <input type="checkbox" id="chk-cheddar-n" style="pointer-events:none;" />
+      <span class="check-name">+ Cheddar</span>
+      <span class="check-price">R$ 1</span>
+    </label>
+
+    <label class="check-row" id="row-bacon-n" onclick="toggleAdicionalNormal('bacon')" style="cursor:pointer;">
+      <input type="checkbox" id="chk-bacon-n" style="pointer-events:none;" />
+      <span class="check-name">+ Bacon</span>
+      <span class="check-price">R$ 1</span>
+    </label>
+
+    <div class="total-row">
+      <span>Total</span>
+      <span class="total-val" id="total-display-n">R$ 15,00</span>
     </div>
 
-    <div class="quick-wrap">
-      <p>Selecao rapida</p>
-      <div class="quick-btns">
-        <button class="quick-btn" onclick="quickAdd(this,'Cachorro Quente')">Cachorro Quente</button>
-        <button class="quick-btn" onclick="quickAdd(this,'+Bacon (R$ 1)')">+ Bacon</button>
-        <button class="quick-btn" onclick="quickAdd(this,'+Cheddar (R$ 1)')">+ Cheddar</button>
-      </div>
-    </div>
-
-    <div class="field">
-      <label>Itens</label>
-      <div id="itens-lista">
-        <div class="item-row">
-          <input type="text" placeholder="Ex: Espetinho de frango" />
-          <button class="btn-remover" onclick="removerItem(this)">x</button>
-        </div>
-      </div>
-      <button class="btn-add-item" onclick="adicionarItem()">+ Adicionar item</button>
-    </div>
+    <hr class="divider" />
 
     <div class="field">
       <label>Observacoes</label>
       <textarea id="obs-normal" placeholder="Sem mostarda, sem cebola..."></textarea>
     </div>
 
-    <div class="pix-box">
+    <div class="pix-box" id="pix-area-n">
       <div class="pix-label">Pagamento via Pix</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Pague antes de confirmar e guarde o comprovante</p>
       <div class="qr-wrap" id="qr-normal"></div>
-      <div class="pix-key">(11) 94030-9283</div>
-      <div class="pix-hint">Chave telefone · 11940309283</div>
+      <div class="pix-key">Cristhian Xavier dos Sant</div>
+      <div class="pix-hint" id="pix-valor-hint-n">R$ 15,00 · Chave Pix aleatoria</div>
     </div>
 
     <button class="btn-submit" id="btn-enviar" onclick="enviarPedido()">Confirmar Pedido</button>
@@ -512,10 +524,9 @@
         <div class="ticket-numero" id="tc-numero-normal">—</div>
       </div>
       <div class="ticket-bottom">
-        <div class="ticket-nome"  id="tc-nome-normal"></div>
-        <div class="ticket-email" id="tc-email-normal"></div>
+        <div class="ticket-nome" id="tc-nome-normal"></div>
         <hr class="ticket-sep" />
-        <div class="ticket-msg"   id="tc-msg-normal"></div>
+        <div class="ticket-msg" id="tc-msg-normal"></div>
       </div>
     </div>
 
@@ -537,12 +548,6 @@
 
       <hr class="divider" />
       <div class="section-label">Monte seu Hot Dog</div>
-
-      <div class="ingredientes">
-        <strong>Cachorro Quente</strong><br>
-        Pao, salsicha, molho de tomate, mostarda, maionese, milho, ervilha, batata palha e ketchup.
-        <span class="aviso">Alguma restricao? Use o campo de observacoes.</span>
-      </div>
 
       <label class="check-row" style="border-color:var(--caramelo);background:var(--palha);">
         <input type="checkbox" id="chk-hotdog" checked disabled style="accent-color:var(--caramelo);" />
@@ -604,24 +609,97 @@
 
 <script>
   // ── CÓDIGOS PIX COMPLETOS POR VALOR ──────────────────────────────────────
-  const PIX_NORMAL = "de6d3fa4-bcb1-4543-aeb9-b434d169d133"; // chave pix normal (aba pedido)
+  const PIX_NORMAL = "de6d3fa4-bcb1-4543-aeb9-b434d169d133";
   const PIX_15 = "00020126580014BR.GOV.BCB.PIX0136de6d3fa4-bcb1-4543-aeb9-b434d169d133520400005303986540515.005802BR5925Cristhian Xavier dos Sant6009SAO PAULO62140510Zl4JoxCaCv6304EB26";
   const PIX_16 = "00020126580014BR.GOV.BCB.PIX0136de6d3fa4-bcb1-4543-aeb9-b434d169d133520400005303986540516.005802BR5925Cristhian Xavier dos Sant6009SAO PAULO62140510ffCzbCvnhx630492CE";
   const PIX_17 = "00020126580014BR.GOV.BCB.PIX0136de6d3fa4-bcb1-4543-aeb9-b434d169d133520400005303986540517.005802BR5925Cristhian Xavier dos Sant6009SAO PAULO62140510vxeeNBzf4F6304835B";
 
-  let qrNormalGerado = false;
-  let qrPvAtual = 0; // 0 = nenhum, 15, 16 ou 17
+  let qrPvAtual = 0;
   let qrPvObj = null;
 
-  // Gera QR fixo da aba normal na inicialização
-  function gerarQRNormal() {
-    const el = document.getElementById("qr-normal");
-    if (!el || el.children.length) return;
-    new QRCode(el, { text: PIX_NORMAL, width: 150, height: 150,
-      colorDark: "#1A0F00", colorLight: "#ffffff",
-      correctLevel: QRCode.CorrectLevel.M });
+  let qrNormalAtual = 0;
+
+  // Gera QR da aba normal dinamicamente por valor
+  function atualizarQRNormal(total) {
+    const el   = document.getElementById("qr-normal");
+    const hint = document.getElementById("pix-valor-hint-n");
+    const codigos = { 15: PIX_15, 16: PIX_16, 17: PIX_17 };
+    const codigo = codigos[total] || PIX_15;
+    if (qrNormalAtual !== total) {
+      qrNormalAtual = total;
+      el.innerHTML = "";
+      new QRCode(el, { text: codigo, width: 150, height: 150,
+        colorDark: "#1A0F00", colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M });
+      hint.textContent = "R$ " + total.toFixed(2).replace(".", ",") + " · Cristhian Xavier dos Sant";
+    }
   }
-  gerarQRNormal();
+
+  // Inicializa QR normal com R$15
+  atualizarQRNormal(15);
+
+  function toggleAdicionalNormal(qual) {
+    const chk = document.getElementById("chk-" + qual + "-n");
+    const row = document.getElementById("row-" + qual + "-n");
+    chk.checked = !chk.checked;
+    row.style.borderColor = chk.checked ? "var(--caramelo)" : "var(--border)";
+    row.style.background  = chk.checked ? "var(--palha)"   : "var(--branco)";
+    let t = 15;
+    if (document.getElementById("chk-cheddar-n").checked) t += 1;
+    if (document.getElementById("chk-bacon-n").checked)   t += 1;
+    document.getElementById("total-display-n").textContent = "R$ " + t.toFixed(2).replace(".", ",");
+    atualizarQRNormal(t);
+  }
+
+  async function enviarPedido() {
+    const nome    = document.getElementById("nome").value.trim();
+    const obs     = document.getElementById("obs-normal").value.trim();
+    const cheddar = document.getElementById("chk-cheddar-n").checked;
+    const bacon   = document.getElementById("chk-bacon-n").checked;
+
+    if (!nome) return mostrarErro("erro-normal", "Preencha seu nome.");
+
+    const itens = ["Cachorro Quente"];
+    if (cheddar) itens.push("+Cheddar");
+    if (bacon)   itens.push("+Bacon");
+    if (obs)     itens.push("OBS: " + obs);
+
+    const btn = document.getElementById("btn-enviar");
+    btn.disabled = true; btn.textContent = "Enviando...";
+    document.getElementById("erro-normal").style.display = "none";
+    document.getElementById("ticket-normal").style.display = "none";
+
+    const avisoDemora = setTimeout(() => { btn.textContent = "Quase la..."; }, 4000);
+
+    try {
+      const r = await fetch("/api/pedidos", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome, email: "sem-email@festa.local", itens }),
+      });
+      const d = await r.json();
+      if (r.ok) {
+        mostrarTicket("normal", d.pedido, null);
+        document.getElementById("nome").value = "";
+        document.getElementById("obs-normal").value = "";
+        document.getElementById("chk-cheddar-n").checked = false;
+        document.getElementById("chk-bacon-n").checked   = false;
+        document.getElementById("row-cheddar-n").style.borderColor = "var(--border)";
+        document.getElementById("row-cheddar-n").style.background  = "var(--branco)";
+        document.getElementById("row-bacon-n").style.borderColor   = "var(--border)";
+        document.getElementById("row-bacon-n").style.background    = "var(--branco)";
+        document.getElementById("total-display-n").textContent = "R$ 15,00";
+        qrNormalAtual = 0;
+        atualizarQRNormal(15);
+      } else {
+        mostrarErro("erro-normal", d.erro || "Tente novamente.");
+      }
+    } catch(e) {
+      mostrarErro("erro-normal", "Erro de conexao.");
+    } finally {
+      clearTimeout(avisoDemora);
+      btn.disabled = false; btn.textContent = "Confirmar Pedido";
+    }
+  }
 
   // Atualiza QR da pré-venda dinamicamente conforme seleção
   function atualizarQRPv(total) {
@@ -717,54 +795,6 @@
     const card = document.getElementById("ticket-" + prefixo);
     card.style.display = "block";
     card.scrollIntoView({ behavior: "smooth", block: "center" });
-  }
-
-  async function enviarPedido() {
-    const nome  = document.getElementById("nome").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const obs   = document.getElementById("obs-normal").value.trim();
-    let itens = Array.from(document.querySelectorAll("#itens-lista input"))
-      .map(i => i.value.trim()).filter(Boolean);
-    if (obs) itens.push("OBS: " + obs);
-
-    if (!nome) return mostrarErro("erro-normal", "Preencha seu nome.");
-    if (!email) return mostrarErro("erro-normal", "Preencha seu e-mail.");
-    if (itens.filter(i => !i.startsWith("OBS")).length === 0)
-      return mostrarErro("erro-normal", "Adicione pelo menos um item.");
-
-    const btn = document.getElementById("btn-enviar");
-    btn.disabled = true; btn.textContent = "Enviando...";
-    document.getElementById("erro-normal").style.display = "none";
-    document.getElementById("ticket-normal").style.display = "none";
-
-    const avisoDemora = setTimeout(() => { btn.textContent = "Quase la..."; }, 4000);
-
-    try {
-      const r = await fetch("/api/pedidos", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nome, email, itens }),
-      });
-      const d = await r.json();
-      if (r.ok) {
-        mostrarTicket("normal", d.pedido, null);
-        document.getElementById("nome").value = "";
-        document.getElementById("email").value = "";
-        document.getElementById("obs-normal").value = "";
-        document.getElementById("itens-lista").innerHTML = `
-          <div class="item-row">
-            <input type="text" placeholder="Ex: Cachorro Quente" />
-            <button class="btn-remover" onclick="removerItem(this)">x</button>
-          </div>`;
-        document.querySelectorAll(".quick-btn").forEach(b => b.classList.remove("ativo"));
-      } else {
-        mostrarErro("erro-normal", d.erro || "Tente novamente.");
-      }
-    } catch(e) {
-      mostrarErro("erro-normal", "Erro de conexao.");
-    } finally {
-      clearTimeout(avisoDemora);
-      btn.disabled = false; btn.textContent = "Confirmar Pedido";
-    }
   }
 
   async function enviarPrevenda() {
