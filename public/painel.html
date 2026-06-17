@@ -288,6 +288,7 @@
     <div class="abas">
       <button class="aba-btn ativa" onclick="trocarAba('producao')">🍗 Produção</button>
       <button class="aba-btn"       onclick="trocarAba('historico')">📄 Histórico</button>
+      <button class="aba-btn"       onclick="trocarAba('sorteio')">🎉 Sorteio</button>
     </div>
 
     <!-- ABA PRODUÇÃO -->
@@ -317,6 +318,34 @@
 
       <div class="secao-titulo" style="margin-top:28px;">🌭 Pré-Vendas Hot Dog</div>
       <div id="hist-pv">Carregando...</div>
+
+    </div>
+
+    <!-- ABA SORTEIO -->
+    <div id="aba-sorteio" class="aba-conteudo">
+
+      <div style="margin-bottom:20px;">
+        <div class="secao-titulo" style="margin:0;border:none;padding:0;">
+          🎉 Sorteio Pré-Venda
+          <span class="secao-count" id="count-sorteio">0</span>
+        </div>
+      </div>
+
+      <!-- Área do ganhador -->
+      <div id="sorteio-resultado" style="display:none;text-align:center;padding:28px 20px;background:linear-gradient(135deg,var(--vermelho),var(--amarelo));border-radius:12px;margin-bottom:24px;color:white;">
+        <div style="font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:.8;margin-bottom:8px;">🏆 Ganhador</div>
+        <div id="sorteio-ticket" style="font-family:'Fredoka One',cursive;font-size:3rem;letter-spacing:4px;line-height:1;"></div>
+        <div id="sorteio-nome" style="font-size:1.3rem;font-weight:700;margin-top:8px;"></div>
+        <div id="sorteio-itens" style="font-size:13px;opacity:.8;margin-top:4px;"></div>
+      </div>
+
+      <button id="btn-sortear" onclick="realizarSorteio()" style="width:100%;padding:16px;background:var(--vermelho);color:white;border:none;border-radius:var(--radius);font-family:'Fredoka One',cursive;font-size:1.2rem;cursor:pointer;margin-bottom:24px;transition:opacity .2s;">
+        🎲 Realizar Sorteio
+      </button>
+
+      <!-- Lista de participantes -->
+      <div class="secao-titulo">Participantes da Pré-Venda</div>
+      <div id="lista-sorteio">Carregando...</div>
 
     </div>
 
@@ -407,9 +436,10 @@
   function trocarAba(nome) {
     document.querySelectorAll(".aba-btn").forEach(b => b.classList.remove("ativa"));
     document.querySelectorAll(".aba-conteudo").forEach(c => c.classList.remove("ativa"));
-    const nomes = ["producao","historico"];
+    const nomes = ["producao","historico","sorteio"];
     document.querySelectorAll(".aba-btn")[nomes.indexOf(nome)].classList.add("ativa");
     document.getElementById("aba-" + nome).classList.add("ativa");
+    if (nome === "sorteio") renderizarSorteio();
   }
 
   // ── CARREGAR PEDIDOS ──────────────────────────────────────────────────────
@@ -472,7 +502,6 @@
         <div class="pedido-card ${isPv?"tipo-pv":""}" id="card-${pedido.ticketNumero}">
           <h3>${pedido.nome} ${totalTag}</h3>
           <div class="ticket ${isPv?"pv-ticket":""}">${pedido.ticketNumero}</div>
-          <div class="email">${pedido.email}</div>
           <div class="itens-check">${itensHTML}</div>
           ${obsHTML}
           <button class="btn-finalizar" onclick="finalizarPedido('${pedido.ticketNumero}')">
@@ -510,7 +539,6 @@
         <div class="prevenda-item">
           <div class="prevenda-nome">${p.nome} ${badge}</div>
           <div class="prevenda-ticket ${isPv?"pv-ticket":""}">${p.ticketNumero}${totalTag}</div>
-          <div class="prevenda-email">${p.email}</div>
           <div class="prevenda-itens">🍽️ ${itensExib.join(", ")}</div>
           ${obsItem ? `<div class="obs-tag" style="margin-top:6px;">📝 ${obsItem.replace("OBS: ","")}</div>` : ""}
         </div>`;
@@ -548,6 +576,100 @@
       }
     } catch(e) { console.error(e); }
   }
+
+  // ── SORTEIO ───────────────────────────────────────────────────────────────
+  function getPrevendarParticipantes() {
+    return pedidos.filter(p => p.tipo === "prevenda_hotdog");
+  }
+
+  function renderizarSorteio() {
+    const pvs = getPrevendarParticipantes();
+    document.getElementById("count-sorteio").textContent = pvs.length;
+
+    const div = document.getElementById("lista-sorteio");
+    if (pvs.length === 0) {
+      div.innerHTML = "<p style='color:#aaa;font-size:14px;padding:8px 0;'>Nenhuma pré-venda registrada ainda.</p>";
+      return;
+    }
+
+    div.innerHTML = `
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <thead>
+          <tr style="background:#f5f5f5;">
+            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #eee;color:var(--escuro);">#</th>
+            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #eee;color:var(--escuro);">Ticket</th>
+            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #eee;color:var(--escuro);">Nome</th>
+            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #eee;color:var(--escuro);">Itens</th>
+            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #eee;color:var(--escuro);">Total</th>
+            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #eee;color:var(--escuro);">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${pvs.map((p, i) => {
+            const itens = (p.itens || []).filter(x => !x.startsWith("OBS:")).join(", ");
+            const total = p.total != null ? "R$ " + Number(p.total).toFixed(2).replace(".",",") : "-";
+            const badge = p.status === "finalizado"
+              ? `<span class="status-badge status-finalizado">Finalizado</span>`
+              : `<span class="status-badge status-pendente">Pendente</span>`;
+            return `<tr style="border-bottom:1px solid #eee;" id="row-${p.ticketNumero}">
+              <td style="padding:10px 12px;color:#aaa;">${i+1}</td>
+              <td style="padding:10px 12px;font-weight:700;color:#856404;">${p.ticketNumero}</td>
+              <td style="padding:10px 12px;font-weight:600;">${p.nome}</td>
+              <td style="padding:10px 12px;color:#555;">${itens}</td>
+              <td style="padding:10px 12px;font-weight:700;color:var(--verde);">${total}</td>
+              <td style="padding:10px 12px;">${badge}</td>
+            </tr>`;
+          }).join("")}
+        </tbody>
+      </table>`;
+  }
+
+  function realizarSorteio() {
+    const pvs = getPrevendarParticipantes();
+    if (pvs.length === 0) { alert("Nenhum participante na pré-venda ainda."); return; }
+
+    const btn = document.getElementById("btn-sortear");
+    const resultado = document.getElementById("sorteio-resultado");
+    const elTicket  = document.getElementById("sorteio-ticket");
+    const elNome    = document.getElementById("sorteio-nome");
+    const elItens   = document.getElementById("sorteio-itens");
+
+    // Remove destaque anterior
+    document.querySelectorAll(".row-ganhador").forEach(r => r.classList.remove("row-ganhador"));
+    resultado.style.display = "none";
+    btn.disabled = true;
+
+    // Animação rolando tickets
+    let contador = 0;
+    const total = 20;
+    const intervalo = setInterval(() => {
+      const temp = pvs[Math.floor(Math.random() * pvs.length)];
+      elTicket.textContent = temp.ticketNumero;
+      elNome.textContent   = temp.nome;
+      resultado.style.display = "block";
+      contador++;
+      if (contador >= total) {
+        clearInterval(intervalo);
+        // Sorteia o ganhador final
+        const ganhador = pvs[Math.floor(Math.random() * pvs.length)];
+        elTicket.textContent = ganhador.ticketNumero;
+        elNome.textContent   = ganhador.nome;
+        const itens = (ganhador.itens || []).filter(x => !x.startsWith("OBS:")).join(" + ");
+        elItens.textContent  = itens;
+        btn.disabled = false;
+        btn.textContent = "🎲 Sortear Novamente";
+        // Destaca na tabela
+        const row = document.getElementById("row-" + ganhador.ticketNumero);
+        if (row) {
+          row.style.background = "#fff3cd";
+          row.style.fontWeight = "bold";
+          row.scrollIntoView({ behavior:"smooth", block:"center" });
+        }
+      }
+    }, 80);
+  }
+
+
 </script>
 </body>
 </html>
