@@ -38,6 +38,7 @@ db.exec(`
     itens_finalizados TEXT NOT NULL DEFAULT '[]',
     status            TEXT NOT NULL DEFAULT 'pendente',
     tipo              TEXT NOT NULL DEFAULT 'normal',   -- 'normal' | 'prevenda_hotdog'
+    oculto            INTEGER NOT NULL DEFAULT 0,       -- 0 = visivel | 1 = oculto (removido do sorteio/listas)
     criado_em         TEXT NOT NULL
   );
 
@@ -54,6 +55,11 @@ try {
   db.exec(`ALTER TABLE pedidos ADD COLUMN tipo TEXT NOT NULL DEFAULT 'normal'`);
 } catch (_) { /* coluna já existe, ignora */ }
 
+// Migração: adiciona coluna 'oculto' se já existia a tabela sem ela
+try {
+  db.exec(`ALTER TABLE pedidos ADD COLUMN oculto INTEGER NOT NULL DEFAULT 0`);
+} catch (_) { /* coluna já existe, ignora */ }
+
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 function parsePedido(row) {
   if (!row) return null;
@@ -66,6 +72,7 @@ function parsePedido(row) {
     itensFinalizados: JSON.parse(row.itens_finalizados),
     status:           row.status,
     tipo:             row.tipo || "normal",
+    oculto:           !!row.oculto,
     criadoEm:         row.criado_em,
   };
 }
@@ -177,6 +184,21 @@ function finalizarPedido(ticketNumero) {
   return pedido;
 }
 
+// ─── VISIBILIDADE (ocultar/desocultar) ───────────────────────────────────────
+function ocultarPedido(ticketNumero) {
+  const info = db.prepare("UPDATE pedidos SET oculto = 1 WHERE ticket_numero = ?").run(ticketNumero);
+  if (info.changes === 0) return null;
+  const row = db.prepare("SELECT * FROM pedidos WHERE ticket_numero = ?").get(ticketNumero);
+  return parsePedido(row);
+}
+
+function desocultarPedido(ticketNumero) {
+  const info = db.prepare("UPDATE pedidos SET oculto = 0 WHERE ticket_numero = ?").run(ticketNumero);
+  if (info.changes === 0) return null;
+  const row = db.prepare("SELECT * FROM pedidos WHERE ticket_numero = ?").get(ticketNumero);
+  return parsePedido(row);
+}
+
 module.exports = {
   criarPedido,
   criarPrevendaHotdog,
@@ -185,4 +207,6 @@ module.exports = {
   finalizarPedido,
   isPrevendaAtiva,
   setConfig,
+  ocultarPedido,
+  desocultarPedido,
 };

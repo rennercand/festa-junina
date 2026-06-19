@@ -240,6 +240,84 @@
     .status-pendente   { background:#fff3cd; color:#856404; }
     .status-finalizado { background:#d4edda; color:#155724; }
 
+    /* ── MODO DE EDIÇÃO (ocultar/reexibir pedidos) ── */
+    #btn-modo-edicao {
+      padding:8px 18px;
+      background:var(--escuro);
+      color:white;
+      border:none;
+      border-radius:20px;
+      font-family:'Nunito',sans-serif;
+      font-weight:700;
+      cursor:pointer;
+      font-size:14px;
+      transition:opacity .2s, background .2s;
+    }
+    #btn-modo-edicao.ativo { background:#6c2bd9; }
+    #btn-modo-edicao:hover { opacity:.85; }
+
+    .edicao-checkbox {
+      display:none;
+      align-items:center;
+      gap:8px;
+      margin-bottom:10px;
+      padding:8px 10px;
+      background:#f3eefc;
+      border:1.5px dashed #6c2bd9;
+      border-radius:6px;
+      font-size:13px;
+      font-weight:700;
+      color:#6c2bd9;
+      cursor:pointer;
+    }
+    body.modo-edicao .edicao-checkbox { display:flex; }
+    .edicao-checkbox input[type="checkbox"] { width:18px; height:18px; cursor:pointer; accent-color:#6c2bd9; }
+
+    body.modo-edicao .pedido-card,
+    body.modo-edicao .prevenda-item {
+      outline: 2px solid transparent;
+      transition: outline-color .2s, opacity .2s;
+    }
+    .marcado-p-ocultar { opacity:.45; outline-color:#6c2bd9 !important; }
+
+    .pedido-oculto-tag {
+      display:inline-block;
+      background:#e2d4f7;
+      color:#4b2185;
+      border-radius:10px;
+      padding:1px 10px;
+      font-size:11px;
+      font-weight:700;
+      margin-left:6px;
+    }
+
+    .barra-acao-edicao {
+      position:sticky;
+      bottom:0;
+      display:none;
+      gap:10px;
+      background:white;
+      border-top:2px solid #6c2bd9;
+      padding:12px 16px;
+      margin:20px -20px -20px;
+      border-radius:0 0 var(--radius) var(--radius);
+    }
+    body.modo-edicao .barra-acao-edicao { display:flex; }
+    .barra-acao-edicao button {
+      flex:1;
+      padding:10px;
+      border:none;
+      border-radius:8px;
+      font-family:'Nunito',sans-serif;
+      font-weight:700;
+      font-size:14px;
+      cursor:pointer;
+      transition:opacity .2s;
+    }
+    .btn-aplicar-edicao { background:#6c2bd9; color:white; }
+    .btn-cancelar-edicao { background:#eee; color:var(--escuro); }
+    .barra-acao-edicao button:hover { opacity:.85; }
+
     @media(max-width:480px) {
       .aba-btn { padding:9px 12px; font-size:13px; }
       .operador-bar { flex-direction:column; align-items:flex-start; }
@@ -282,6 +360,7 @@
       <span>🌭 Pré-venda Hot Dog: <span id="status-pv-badge">—</span></span>
       <button id="btn-toggle-pv" class="btn-toggle ativar" onclick="togglePrevenda()">—</button>
       <button id="btn-atualizar" onclick="carregarPedidos()">🔄 Atualizar</button>
+      <button id="btn-modo-edicao" onclick="toggleModoEdicao()">✏️ Modo de edição</button>
     </div>
 
     <!-- Abas -->
@@ -350,6 +429,14 @@
     </div>
 
   </div><!-- /main-wrap -->
+
+  <div class="barra-acao-edicao" style="max-width:960px;margin-left:auto;margin-right:auto;border-radius:var(--radius);box-shadow:0 -2px 14px rgba(0,0,0,.12);">
+    <span style="display:flex;align-items:center;font-weight:700;color:var(--escuro);padding-left:4px;">
+      <span id="contador-selecionados">0</span>&nbsp;selecionado(s)
+    </span>
+    <button class="btn-cancelar-edicao" onclick="toggleModoEdicao()">Cancelar</button>
+    <button class="btn-aplicar-edicao" onclick="aplicarEdicaoVisibilidade()">✅ Aplicar alterações</button>
+  </div>
 </div><!-- /painel -->
 
 
@@ -357,6 +444,8 @@
   let pedidos = [];
   let senhaOperador = "";
   let prevendaAtiva = true;
+  let modoEdicao = false;
+  let ticketsParaAlterar = new Set(); // tickets marcados no checkbox (a alternar visibilidade ao aplicar)
 
   // ── LOGIN ──────────────────────────────────────────────────────────────────
   async function fazerLogin() {
@@ -442,6 +531,89 @@
     if (nome === "sorteio") renderizarSorteio();
   }
 
+  // ── MODO DE EDIÇÃO (ocultar/reexibir pedidos) ───────────────────────────────
+  function toggleModoEdicao() {
+    modoEdicao = !modoEdicao;
+    ticketsParaAlterar.clear();
+    document.body.classList.toggle("modo-edicao", modoEdicao);
+    document.getElementById("btn-modo-edicao").classList.toggle("ativo", modoEdicao);
+    document.getElementById("btn-modo-edicao").textContent = modoEdicao ? "✖️ Sair do modo de edição" : "✏️ Modo de edição";
+    atualizarContadorSelecionados();
+    renderizarProducao();
+    renderizarHistorico();
+    renderizarSorteio();
+  }
+
+  function toggleSelecaoTicket(ticket, cb) {
+    if (cb.checked) ticketsParaAlterar.add(ticket);
+    else ticketsParaAlterar.delete(ticket);
+
+    // Atualiza visual de "marcado para ocultar" só quando o pedido NÃO está oculto
+    // (ou seja: estamos prestes a ocultá-lo, não a reexibi-lo)
+    const pedido = pedidos.find(p => p.ticketNumero === ticket);
+    document.querySelectorAll(`[data-ticket="${ticket}"]`).forEach(el => {
+      if (pedido && !pedido.oculto) el.classList.toggle("marcado-p-ocultar", cb.checked);
+    });
+
+    atualizarContadorSelecionados();
+  }
+
+  function atualizarContadorSelecionados() {
+    const el = document.getElementById("contador-selecionados");
+    if (el) el.textContent = ticketsParaAlterar.size;
+  }
+
+  function checkboxEdicaoHTML(pedido) {
+    if (!modoEdicao) return "";
+    const marcado = ticketsParaAlterar.has(pedido.ticketNumero) ? "checked" : "";
+    const label = pedido.oculto ? "👁️ Reexibir este pedido" : "🙈 Ocultar este pedido";
+    return `
+      <label class="edicao-checkbox" onclick="event.stopPropagation()">
+        <input type="checkbox" ${marcado}
+          onchange="toggleSelecaoTicket('${pedido.ticketNumero}', this)" />
+        ${label}
+      </label>`;
+  }
+
+  async function aplicarEdicaoVisibilidade() {
+    if (ticketsParaAlterar.size === 0) {
+      toggleModoEdicao();
+      return;
+    }
+
+    const aOcultar    = [...ticketsParaAlterar].filter(t => { const p = pedidos.find(x=>x.ticketNumero===t); return p && !p.oculto; });
+    const aReexibir   = [...ticketsParaAlterar].filter(t => { const p = pedidos.find(x=>x.ticketNumero===t); return p && p.oculto; });
+
+    let msg = "";
+    if (aOcultar.length)  msg += `Ocultar ${aOcultar.length} pedido(s): ${aOcultar.join(", ")}\n`;
+    if (aReexibir.length) msg += `Reexibir ${aReexibir.length} pedido(s): ${aReexibir.join(", ")}\n`;
+    msg += "\nPedidos ocultos não aparecem em Produção, Histórico nem no Sorteio. Confirma?";
+
+    if (!confirm(msg)) return;
+
+    try {
+      for (const ticket of aOcultar) {
+        const r = await fetch(`/api/pedidos/${ticket}/ocultar`, {
+          method:"PATCH", headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({ senha: senhaOperador }),
+        });
+        const d = await r.json();
+        if (r.ok) { const idx = pedidos.findIndex(p=>p.ticketNumero===ticket); if (idx!==-1) pedidos[idx]=d.pedido; }
+      }
+      for (const ticket of aReexibir) {
+        const r = await fetch(`/api/pedidos/${ticket}/desocultar`, {
+          method:"PATCH", headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({ senha: senhaOperador }),
+        });
+        const d = await r.json();
+        if (r.ok) { const idx = pedidos.findIndex(p=>p.ticketNumero===ticket); if (idx!==-1) pedidos[idx]=d.pedido; }
+      }
+      toggleModoEdicao();
+    } catch (e) {
+      alert("Erro de conexão ao aplicar alterações.");
+    }
+  }
+
   // ── CARREGAR PEDIDOS ──────────────────────────────────────────────────────
   async function carregarPedidos() {
     try {
@@ -456,7 +628,8 @@
 
   // ── PRODUÇÃO ──────────────────────────────────────────────────────────────
   function renderizarProducao() {
-    const pendentes = pedidos.filter(p => p.status === "pendente");
+    let pendentes = pedidos.filter(p => p.status === "pendente");
+    if (!modoEdicao) pendentes = pendentes.filter(p => !p.oculto);
 
     const normais = pendentes.filter(p => p.tipo !== "prevenda_hotdog");
     const pvs     = pendentes.filter(p => p.tipo === "prevenda_hotdog");
@@ -503,9 +676,13 @@
       const obsHTML = obsItem
         ? `<div class="obs-tag">📝 ${obsItem.replace("OBS: ","")}</div>` : "";
 
+      const ocultoTag = pedido.oculto ? `<span class="pedido-oculto-tag">🙈 Oculto</span>` : "";
+      const jaMarcado = ticketsParaAlterar.has(pedido.ticketNumero);
+
       return `
-        <div class="pedido-card ${isPv?"tipo-pv":""}" id="card-${pedido.ticketNumero}">
-          <h3>${pedido.nome} ${qtdTag} ${totalTag}</h3>
+        <div class="pedido-card ${isPv?"tipo-pv":""} ${jaMarcado && !pedido.oculto ? "marcado-p-ocultar" : ""}" data-ticket="${pedido.ticketNumero}" id="card-${pedido.ticketNumero}">
+          ${checkboxEdicaoHTML(pedido)}
+          <h3>${pedido.nome} ${qtdTag} ${totalTag} ${ocultoTag}</h3>
           <div class="ticket ${isPv?"pv-ticket":""}">${pedido.ticketNumero}</div>
           <div class="itens-check">${itensHTML}</div>
           ${obsHTML}
@@ -518,8 +695,11 @@
 
   // ── HISTÓRICO ─────────────────────────────────────────────────────────────
   function renderizarHistorico() {
-    const normais = pedidos.filter(p => p.tipo !== "prevenda_hotdog");
-    const pvs     = pedidos.filter(p => p.tipo === "prevenda_hotdog");
+    let base = pedidos;
+    if (!modoEdicao) base = base.filter(p => !p.oculto);
+
+    const normais = base.filter(p => p.tipo !== "prevenda_hotdog");
+    const pvs     = base.filter(p => p.tipo === "prevenda_hotdog");
 
     document.getElementById("hist-normais").innerHTML = renderHistLista(normais);
     document.getElementById("hist-pv").innerHTML      = renderHistLista(pvs);
@@ -541,10 +721,13 @@
       const qtdTagH   = qtdMatchH ? ` · <strong>${qtdMatchH.match(/x\d+/i)[0]} unid.</strong>` : "";
       const totalTag    = isPv && p.total != null
         ? ` · <strong>R$ ${Number(p.total).toFixed(2).replace(".",",")}</strong>` : "";
+      const ocultoTag = p.oculto ? `<span class="pedido-oculto-tag">🙈 Oculto</span>` : "";
+      const jaMarcado = ticketsParaAlterar.has(p.ticketNumero);
 
       return `
-        <div class="prevenda-item">
-          <div class="prevenda-nome">${p.nome} ${badge}</div>
+        <div class="prevenda-item ${jaMarcado && !p.oculto ? "marcado-p-ocultar" : ""}" data-ticket="${p.ticketNumero}">
+          ${checkboxEdicaoHTML(p)}
+          <div class="prevenda-nome">${p.nome} ${badge} ${ocultoTag}</div>
           <div class="prevenda-ticket ${isPv?"pv-ticket":""}">${p.ticketNumero}${qtdTagH}${totalTag}</div>
           <div class="prevenda-itens">🍽️ ${itensExib.join(", ")}</div>
           ${obsItem ? `<div class="obs-tag" style="margin-top:6px;">📝 ${obsItem.replace("OBS: ","")}</div>` : ""}
@@ -586,18 +769,24 @@
 
   // ── SORTEIO ───────────────────────────────────────────────────────────────
   function getPrevendarParticipantes() {
-    return pedidos.filter(p => p.tipo === "prevenda_hotdog");
+    // Pedidos ocultos nunca participam do sorteio, mesmo no modo de edição
+    return pedidos.filter(p => p.tipo === "prevenda_hotdog" && !p.oculto);
   }
 
   function renderizarSorteio() {
-    const pvs = getPrevendarParticipantes();
-    document.getElementById("count-sorteio").textContent = pvs.length;
+    // No modo de edição, mostra também os ocultos (para poder reexibir / remover do sorteio)
+    let pvs = pedidos.filter(p => p.tipo === "prevenda_hotdog");
+    if (!modoEdicao) pvs = pvs.filter(p => !p.oculto);
+
+    document.getElementById("count-sorteio").textContent = pvs.filter(p => !p.oculto).length;
 
     const div = document.getElementById("lista-sorteio");
     if (pvs.length === 0) {
       div.innerHTML = "<p style='color:#aaa;font-size:14px;padding:8px 0;'>Nenhuma pré-venda registrada ainda.</p>";
       return;
     }
+
+    const colEdicao = modoEdicao ? `<th style="padding:10px 12px;text-align:left;border-bottom:2px solid #eee;color:var(--escuro);">Participa?</th>` : "";
 
     div.innerHTML = `
       <table style="width:100%;border-collapse:collapse;font-size:14px;">
@@ -610,6 +799,7 @@
             <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #eee;color:var(--escuro);">Qtd</th>
             <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #eee;color:var(--escuro);">Total</th>
             <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #eee;color:var(--escuro);">Status</th>
+            ${colEdicao}
           </tr>
         </thead>
         <tbody>
@@ -621,14 +811,30 @@
             const badge = p.status === "finalizado"
               ? `<span class="status-badge status-finalizado">Finalizado</span>`
               : `<span class="status-badge status-pendente">Pendente</span>`;
-            return `<tr style="border-bottom:1px solid #eee;" id="row-${p.ticketNumero}">
+            const ocultoTag = p.oculto ? `<span class="pedido-oculto-tag">🙈 Não participa</span>` : "";
+
+            let colEdicaoTd = "";
+            if (modoEdicao) {
+              const marcado = ticketsParaAlterar.has(p.ticketNumero) ? "checked" : "";
+              const label = p.oculto ? "Reincluir" : "Remover";
+              colEdicaoTd = `<td style="padding:10px 12px;">
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:700;color:#6c2bd9;">
+                  <input type="checkbox" ${marcado} style="width:17px;height:17px;accent-color:#6c2bd9;"
+                    onchange="toggleSelecaoTicket('${p.ticketNumero}', this)" />
+                  ${label}
+                </label>
+              </td>`;
+            }
+
+            return `<tr style="border-bottom:1px solid #eee;${p.oculto?"opacity:.45;":""}" id="row-${p.ticketNumero}" data-ticket="${p.ticketNumero}">
               <td style="padding:10px 12px;color:#aaa;">${i+1}</td>
               <td style="padding:10px 12px;font-weight:700;color:#856404;">${p.ticketNumero}</td>
-              <td style="padding:10px 12px;font-weight:600;">${p.nome}</td>
+              <td style="padding:10px 12px;font-weight:600;">${p.nome} ${ocultoTag}</td>
               <td style="padding:10px 12px;color:#555;">${itens}</td>
               <td style="padding:10px 12px;font-weight:700;color:#856404;">${qtdSort}</td>
               <td style="padding:10px 12px;font-weight:700;color:var(--verde);">${total}</td>
               <td style="padding:10px 12px;">${badge}</td>
+              ${colEdicaoTd}
             </tr>`;
           }).join("")}
         </tbody>

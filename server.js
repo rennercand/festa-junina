@@ -69,6 +69,36 @@ app.patch("/api/pedidos/:ticket/finalizar", (req, res) => {
   res.json({ mensagem: "Pedido finalizado com sucesso!", pedido });
 });
 
+// PATCH /api/pedidos/:ticket/ocultar — remove o pedido de produção/histórico/sorteio
+app.patch("/api/pedidos/:ticket/ocultar", (req, res) => {
+  const { ticket } = req.params;
+  const { senha } = req.body;
+  if (senha !== SENHA_OPERADOR) {
+    return res.status(401).json({ erro: "Não autorizado." });
+  }
+
+  const pedido = db.ocultarPedido(ticket);
+  if (!pedido) return res.status(404).json({ erro: "Pedido não encontrado." });
+
+  console.log(`🙈 Pedido ocultado: ${ticket}`);
+  res.json({ mensagem: "Pedido ocultado.", pedido });
+});
+
+// PATCH /api/pedidos/:ticket/desocultar — traz o pedido de volta às listas
+app.patch("/api/pedidos/:ticket/desocultar", (req, res) => {
+  const { ticket } = req.params;
+  const { senha } = req.body;
+  if (senha !== SENHA_OPERADOR) {
+    return res.status(401).json({ erro: "Não autorizado." });
+  }
+
+  const pedido = db.desocultarPedido(ticket);
+  if (!pedido) return res.status(404).json({ erro: "Pedido não encontrado." });
+
+  console.log(`👁️ Pedido reexibido: ${ticket}`);
+  res.json({ mensagem: "Pedido reexibido.", pedido });
+});
+
 
 // ─── PRÉ-VENDA HOT DOG ────────────────────────────────────────────────────────
 
