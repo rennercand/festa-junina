@@ -1,5 +1,7 @@
 // server.js — Servidor principal da aplicação
 
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -9,13 +11,12 @@ const db = require("./db");
 const app = express();
 const PORTA = process.env.PORT || 3000;
 
-const SENHA_OPERADOR = process.env.SENHA_OPERADOR || "cenoriniscoobini";
+const SENHA_OPERADOR = process.env.SENHA_OPERADOR;
 
 // ─── MIDDLEWARES ──────────────────────────────────────────────────────────────
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
-
 
 // ─── PEDIDOS NORMAIS ──────────────────────────────────────────────────────────
 
@@ -24,7 +25,9 @@ app.post("/api/pedidos", (req, res) => {
   const { nome, email, itens } = req.body;
 
   if (!nome || !email || !itens || itens.length === 0) {
-    return res.status(400).json({ erro: "Campos obrigatórios: nome, email e pelo menos um item." });
+    return res
+      .status(400)
+      .json({ erro: "Campos obrigatórios: nome, email e pelo menos um item." });
   }
 
   try {
@@ -51,7 +54,8 @@ app.get("/api/pedidos", (req, res) => {
 app.patch("/api/pedidos/:ticket/item", (req, res) => {
   const { ticket } = req.params;
   const { item } = req.body;
-  if (!item) return res.status(400).json({ erro: "Informe o item a finalizar." });
+  if (!item)
+    return res.status(400).json({ erro: "Informe o item a finalizar." });
 
   const pedido = db.finalizarItem(ticket, item);
   if (!pedido) return res.status(404).json({ erro: "Pedido não encontrado." });
@@ -99,7 +103,6 @@ app.patch("/api/pedidos/:ticket/desocultar", (req, res) => {
   res.json({ mensagem: "Pedido reexibido.", pedido });
 });
 
-
 // ─── PRÉ-VENDA HOT DOG ────────────────────────────────────────────────────────
 
 // GET /api/prevenda/status — informa se a pré-venda está aberta
@@ -131,19 +134,26 @@ app.post("/api/prevenda", (req, res) => {
     itens.push(label);
     total += 15 * qtd;
   }
-  if (adicionais?.cheddar) { itens.push("+Cheddar"); total += 1 * qtd; }
-  if (adicionais?.bacon)   { itens.push("+Bacon");   total += 1 * qtd; }
+  if (adicionais?.cheddar) {
+    itens.push("+Cheddar");
+    total += 1 * qtd;
+  }
+  if (adicionais?.bacon) {
+    itens.push("+Bacon");
+    total += 1 * qtd;
+  }
 
   try {
     const pedido = db.criarPrevendaHotdog({ nome, email, itens, total });
-    console.log(`🌭 Pré-venda criada: ${pedido.ticketNumero} — ${nome} — R$${total}`);
+    console.log(
+      `🌭 Pré-venda criada: ${pedido.ticketNumero} — ${nome} — R$${total}`,
+    );
     res.status(201).json({ mensagem: "Pré-venda confirmada!", pedido });
   } catch (erro) {
     console.error("Erro ao criar pré-venda no banco:", erro);
     res.status(500).json({ erro: "Erro interno ao criar a pré-venda." });
   }
 });
-
 
 // ─── OPERADOR ────────────────────────────────────────────────────────────────
 
@@ -165,9 +175,11 @@ app.patch("/api/operador/prevenda", (req, res) => {
   }
   db.setConfig("prevenda_ativa", ativa ? "true" : "false");
   console.log(`🔧 Pré-venda ${ativa ? "ATIVADA" : "DESATIVADA"} pelo operador`);
-  res.json({ mensagem: `Pré-venda ${ativa ? "ativada" : "desativada"}.`, ativa });
+  res.json({
+    mensagem: `Pré-venda ${ativa ? "ativada" : "desativada"}.`,
+    ativa,
+  });
 });
-
 
 // ─── INICIAR ──────────────────────────────────────────────────────────────────
 app.listen(PORTA, () => {

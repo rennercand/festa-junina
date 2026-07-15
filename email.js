@@ -3,11 +3,10 @@
 // 1. Ativar "Senhas de app" na conta Google (não usa a senha normal)
 // 2. Preencher EMAIL_USER e EMAIL_PASS no arquivo .env
 
-const nodemailer = require("nodemailer");
-
 // ✅ Variáveis centralizadas — evita inconsistência entre auth e from
-const EMAIL_USER = process.env.EMAIL_USER || "rennerfag@gmail.com";
-const EMAIL_PASS = process.env.EMAIL_PASS || "oyawlaonkdiysepd";
+const nodemailer = require("nodemailer");
+const EMAIL_USER = process.env.EMAIL_USER;
+const EMAIL_PASS = process.env.EMAIL_PASS;
 
 // Transporter: é a "conexão" com o servidor de e-mail.
 function criarTransporter() {
@@ -26,7 +25,8 @@ function montarHTMLTicket(pedido) {
   let itensArray = pedido.itens;
   if (!Array.isArray(itensArray)) {
     try {
-      const parsed = typeof itensArray === "string" ? JSON.parse(itensArray) : itensArray;
+      const parsed =
+        typeof itensArray === "string" ? JSON.parse(itensArray) : itensArray;
       itensArray = parsed.itens || [];
     } catch (_) {
       itensArray = [];
@@ -86,7 +86,9 @@ async function enviarTicket(pedido) {
 
   try {
     const info = await transporter.sendMail(opcoes);
-    console.log(`✅ E-mail enviado para ${pedido.email} — ID: ${info.messageId}`);
+    console.log(
+      `✅ E-mail enviado para ${pedido.email} — ID: ${info.messageId}`,
+    );
     return { sucesso: true, messageId: info.messageId };
   } catch (erro) {
     console.error("❌ Erro ao enviar e-mail:", erro.message);
