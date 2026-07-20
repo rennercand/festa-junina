@@ -9,10 +9,10 @@ npm install
 ```
 
 ### 2. Configurar o e-mail (Gmail)
-Abra o arquivo `email.js` e substitua:
-```js
-user: "seuemail@gmail.com",
-pass: "sua_senha_de_app_aqui",
+crie o arquivo `.env` e coloque
+```
+EMAIL_USER: "seuemail@gmail.com",
+EMAIL_PASS: "sua_senha_de_app_aqui",
 ```
 
 > ⚠️ A senha NÃO é sua senha normal do Gmail.
